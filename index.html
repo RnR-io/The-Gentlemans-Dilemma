@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gentleman's Dilemma - A Nyx Coder Project</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z' fill='%230f546b'/%3E%3C/svg%3E" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="stylesheet" as="style" onload="this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B600%3B700%3B800%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+        /* --- Custom Styles & Color Palette --- */
+        :root {
+            --background-light: #f9fafa;
+            --primary-accent: #afc6ce;
+            --text-secondary: #67787e;
+            --border-color: #ebeeef;
+            --dark-text: #121516;
+            --primary-teal: #0f546b;
+        }
+
+        /* --- Page Transitions --- */
+        .page-content { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .page-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* --- Active Nav Link --- */
+        .nav-link.active {
+            color: var(--dark-text);
+            font-weight: 700;
+        }
+
+        /* --- Custom Range Slider --- */
+        .slider-container { position: relative; display: flex; align-items: center; }
+        input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; cursor: pointer; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { background: var(--border-color); height: 4px; border-radius: 2px; }
+        input[type=range]::-moz-range-track { background: var(--border-color); height: 4px; border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -6px; background-color: var(--primary-accent); height: 16px; width: 16px; border-radius: 50%; transition: all 0.15s ease-out; }
+        input[type=range]::-moz-range-thumb { background-color: var(--primary-accent); height: 16px; width: 16px; border-radius: 50%; border: none; transition: all 0.15s ease-out; }
+        .slider-track-fill { position: absolute; left: 0; height: 4px; background-color: var(--primary-accent); border-radius: 2px; pointer-events: none; }
+
+        /* --- Urinal Simulator Styles --- */
+        .urinal-svg-container {
+            background-color: #FDF4E3; /* Wall color from image */
+            border-bottom: 4px solid #D2B48C; /* Floor color */
+            padding: 2rem 1rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease-in-out;
+        }
+        .urinal { transition: all 0.3s ease-in-out; }
+        .urinal-occupied .person-icon { opacity: 1; }
+        .urinal-new .urinal-highlight { opacity: 1; }
+        .person-icon { opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .urinal-highlight { opacity: 0; transition: opacity 0.3s ease-in-out; fill: #e91e63; animation: pulse 1.5s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        
+        /* --- Analysis Box --- */
+        #analysisBox { background: var(--border-color); border-radius: 0.75rem; padding: 1rem; margin-top: 1.5rem; color: var(--text-secondary); font-style: italic; text-align: center; transition: all 0.3s ease-in-out; min-height: 80px; }
+    </style>
+</head>
+<body>
+    <div class="relative flex size-full min-h-screen flex-col bg-[#f9fafa] group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+        <div class="layout-container flex h-full grow flex-col">
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#ebeeef] px-10 py-3">
+                <div class="flex items-center gap-4 text-[#121516]">
+                    <div class="size-4 text-[#afc6ce]">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor"></path></svg>
+                    </div>
+                    <h2 class="text-[#121516] text-lg font-bold leading-tight tracking-[-0.015em]">Nyx Coder</h2>
+                </div>
+                <div class="flex flex-1 justify-end gap-8">
+                    <div class="flex items-center gap-9" id="nav-links">
+                        <a class="nav-link text-sm font-medium leading-normal active" href="#home">Home</a>
+                        <a class="nav-link text-sm font-medium leading-normal" href="#dilemma">The Dilemma</a>
+                        <a class="nav-link text-sm font-medium leading-normal" href="#philosophy">The Philosophy</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="px-4 md:px-40 flex flex-1 justify-center py-5">
+                <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+                    
+                    <!-- Home Page -->
+                    <section id="home" class="page-content active">
+                        <h1 class="text-[#121516] tracking-light text-[32px] font-bold leading-tight px-4 text-center pb-3 pt-6">The Gentleman's Dilemma</h1>
+                        <p class="text-[#67787e] text-base font-normal leading-normal pb-3 pt-1 px-4 text-center">An interactive simulator for the 'Urinal Problem'</p>
+                        
+                        <!-- Simulator Display -->
+                        <div id="urinalContainer" class="urinal-svg-container flex flex-wrap items-center justify-center gap-1 md:gap-2">
+                            <!-- Urinals will be rendered here by JavaScript -->
+                        </div>
+
+                        <!-- Controls -->
+                        <div id="statusMessage" class="text-center text-base text-[#67787e] my-4">Adjust the slider to begin.</div>
+                        <div class="@container">
+                            <div class="relative flex w-full flex-col items-start justify-between gap-3 p-4 @[480px]:flex-row @[480px]:items-center">
+                                <p class="text-[#121516] text-base font-medium leading-normal">Urinal Occupancy</p>
+                                <div class="flex h-4 w-full items-center gap-4 slider-container">
+                                    <div class="slider-track-fill"></div>
+                                    <input type="range" id="numUrinalsSlider" value="10" min="3" max="20" class="w-full">
+                                </div>
+                                <p id="sliderValue" class="text-[#121516] text-sm font-normal leading-normal">10</p>
+                            </div>
+                        </div>
+                        
+                        <div id="analysisBox" class="hidden"></div>
+
+                        <div class="flex justify-center">
+                            <div class="flex flex-1 gap-3 flex-wrap px-4 py-3 max-w-[480px] justify-center">
+                                <button id="nextPersonBtn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#afc6ce] text-[#121516] text-sm font-bold leading-normal tracking-[0.015em] grow">
+                                    <span class="truncate">Next Person Arrives</span>
+                                </button>
+                                <button id="resetBtn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#ebeeef] text-[#121516] text-sm font-bold leading-normal tracking-[0.015em] grow hidden">
+                                    <span class="truncate">Reset</span>
+                                </button>
+                                <button id="analyzeBtn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#ebeeef] text-[#121516] text-sm font-bold leading-normal tracking-[0.015em] grow hidden">
+                                    <span class="truncate">Consult the AI</span>
+                                </button>
+                                <button id="transcribeBtn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#ebeeef] text-[#121516] text-sm font-bold leading-normal tracking-[0.015em] grow hidden">
+                                    <span class="truncate">🔊 Listen Again</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- The Dilemma Page -->
+                    <section id="dilemma" class="page-content">
+                         <div class="p-8 md:p-12">
+                            <h2 class="text-3xl md:text-4xl font-extrabold text-center text-[var(--primary-teal)] mb-6">The Dilemma</h2>
+                            <p class="text-lg mb-4 text-[var(--light-teal)]">The Urinal Problem is a classic, real-world example of an optimization algorithm that most men execute subconsciously. The primary goal is simple: Maximize the distance between yourself and every other person. This creates a buffer of personal space and minimizes potential social awkwardness.</p>
+                            <h3 class="text-xl font-bold mt-8 mb-3 text-[var(--dark-text)]">The Unwritten Rules:</h3>
+                            <ul class="list-disc list-inside text-lg space-y-2 text-[var(--light-teal)]">
+                                <li><strong>Rule 1: The Anchor.</strong> If all urinals are empty, choose one at either end. This guarantees a one-sided buffer.</li>
+                                <li><strong>Rule 2: The Maximizer.</strong> If one or more urinals are occupied, choose the one that is farthest from any other person.</li>
+                                <li><strong>Rule 3: The Buffer.</strong> Never choose a urinal directly adjacent to an occupied one unless there is absolutely no other choice.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- The Philosophy Page -->
+                    <section id="philosophy" class="page-content">
+                        <div class="p-8 md:p-12 text-center">
+                            <h2 class="text-3xl md:text-4xl font-extrabold text-center text-[var(--primary-teal)] mb-6">The Philosophy</h2>
+                            <blockquote class="text-2xl md:text-3xl font-semibold italic text-[var(--dark-text)]">
+                                <span class="text-5xl leading-none" style="color: var(--primary-teal);">&ldquo;</span>
+                                In the quiet calculus of the restroom, we find the purest form of non-verbal social contract.
+                                <span class="text-5xl leading-none" style="color: var(--primary-teal);">&rdquo;</span>
+                            </blockquote>
+                            <p class="mt-6 text-lg text-[var(--light-teal)]">This simulator is more than a tool; it's a study in proxemics and game theory. Each choice is a move in a silent, sequential game where every player, acting in their own self-interest, contributes to a surprisingly efficient and orderly system. It's a beautiful, unspoken dance of social optimization.</p>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // --- Page Navigation Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinksContainer = document.getElementById('nav-links');
+            const pageContents = document.querySelectorAll('.page-content');
+
+            function showPage(hash) {
+                const targetId = hash ? hash.substring(1) : 'home';
+                pageContents.forEach(page => page.classList.toggle('active', page.id === targetId));
+                navLinksContainer.querySelectorAll('a').forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${targetId}`);
+                });
+            }
+
+            navLinksContainer.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A') {
+                    e.preventDefault();
+                    const hash = e.target.getAttribute('href');
+                    history.pushState(null, '', hash);
+                    showPage(hash);
+                }
+            });
+
+            window.addEventListener('popstate', () => showPage(window.location.hash));
+            showPage(window.location.hash);
+        });
+
+        // --- Urinal Simulator Logic ---
+        const numUrinalsSlider = document.getElementById('numUrinalsSlider');
+        const sliderValue = document.getElementById('sliderValue');
+        const sliderTrackFill = document.querySelector('.slider-track-fill');
+        const nextPersonBtn = document.getElementById('nextPersonBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const transcribeBtn = document.getElementById('transcribeBtn');
+        const urinalContainer = document.getElementById('urinalContainer');
+        const statusMessage = document.getElementById('statusMessage');
+        const analysisBox = document.getElementById('analysisBox');
+        let urinals = [];
+        let lastAnalysisText = ""; // To store the text for transcription
+
+        const getUrinalSVG = (index, isOccupied) => {
+            const occupiedClass = isOccupied ? 'urinal-occupied' : '';
+            let sizeClass = 'w-24 h-40'; // Default size
+            if (urinals.length > 8) sizeClass = 'w-20 h-32';
+            if (urinals.length > 12) sizeClass = 'w-16 h-28';
+            if (urinals.length > 16) sizeClass = 'w-12 h-24';
+
+            return `<div class="urinal ${sizeClass} ${occupiedClass}" data-index="${index}">
+                        <svg viewBox="0 0 120 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 10C20 4.47715 24.4772 0 30 0H90C95.5228 0 100 4.47715 100 10V110C100 143.137 73.1371 170 40 170H20V10Z" fill="#FEFEFE"/>
+                            <path d="M98 110V10C98 5.58172 94.4183 2 90 2H30C25.5817 2 22 5.58172 22 10V168" stroke="#E5E7EB" stroke-width="3"/>
+                            <path d="M46 20H74V28H46V20Z" fill="#D1D5DB"/>
+                            <g class="person-icon">
+                                <circle cx="60" cy="70" r="20" fill="#0f546b"/>
+                                <path d="M30 100C30 90 40 85 60 85C80 85 90 90 90 100V140H30V100Z" fill="#0f546b"/>
+                            </g>
+                            <circle class="urinal-highlight" cx="60" cy="24" r="6" />
+                        </svg>
+                    </div>`;
+        };
+
+        function updateSliderUI(value) {
+            sliderValue.textContent = value;
+            const min = numUrinalsSlider.min;
+            const max = numUrinalsSlider.max;
+            const percent = ((value - min) / (max - min)) * 100;
+            if(sliderTrackFill) {
+                sliderTrackFill.style.width = `${percent}%`;
+            }
+        }
+        
+        function handleSliderChange(e) {
+            const count = parseInt(e.target.value, 10);
+            updateSliderUI(count);
+            initializeRestroom(count);
+        }
+
+        function initializeRestroom(count) {
+            urinals = new Array(count).fill(0);
+            statusMessage.innerHTML = 'A new restroom is ready. Click "Next Person Arrives" to begin.';
+            analysisBox.classList.add('hidden');
+            transcribeBtn.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            analyzeBtn.classList.add('hidden');
+            renderUrinals();
+        }
+
+        function handleNextPerson() {
+            resetBtn.classList.remove('hidden');
+            analyzeBtn.classList.remove('hidden');
+            transcribeBtn.classList.add('hidden');
+
+            const lastNew = urinalContainer.querySelector('.urinal-new');
+            if (lastNew) lastNew.classList.remove('urinal-new');
+            const choice = findOptimalUrinal();
+            if (choice !== -1) {
+                urinals[choice] = 1;
+                renderUrinals();
+                const chosenUrinalEl = urinalContainer.querySelector(`[data-index='${choice}']`);
+                if (chosenUrinalEl) chosenUrinalEl.classList.add('urinal-new');
+                statusMessage.innerHTML = `Optimal choice is <strong>Urinal #${choice + 1}</strong>.`;
+            } else {
+                statusMessage.innerHTML = `<strong class="text-red-500">The restroom is full!</strong>`;
+            }
+        }
+
+        function findOptimalUrinal() {
+            if (!urinals.includes(1)) return 0;
+            let bestChoice = -1, maxMinDistance = -1;
+            for (let i = 0; i < urinals.length; i++) {
+                if (urinals[i] === 0) {
+                    let minDistance = Infinity;
+                    for (let j = 0; j < urinals.length; j++) {
+                        if (urinals[j] === 1) minDistance = Math.min(minDistance, Math.abs(i - j));
+                    }
+                    if (minDistance > maxMinDistance) {
+                        maxMinDistance = minDistance;
+                        bestChoice = i;
+                    }
+                }
+            }
+            return bestChoice;
+        }
+
+        function renderUrinals() {
+            urinalContainer.innerHTML = '';
+            urinals.forEach((state, index) => {
+                urinalContainer.innerHTML += getUrinalSVG(index, state === 1);
+            });
+            nextPersonBtn.disabled = !urinals.includes(0);
+            analyzeBtn.disabled = !urinals.includes(1);
+        }
+
+        function handleTranscription() {
+            if (!lastAnalysisText || typeof window.speechSynthesis === 'undefined') {
+                statusMessage.textContent = "Speech synthesis is not supported in your browser.";
+                return;
+            }
+            // Cancel any previous speech
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(lastAnalysisText);
+            utterance.rate = 0.9;
+            speechSynthesis.speak(utterance);
+        }
+
+        async function handleAnalysis() {
+            analysisBox.classList.remove('hidden');
+            transcribeBtn.classList.add('hidden');
+            analysisBox.innerHTML = '<div class="flex justify-center items-center h-full"><div class="dot-flashing"></div></div>';
+            analyzeBtn.disabled = true;
+            const occupiedPositions = urinals.map((u, i) => u === 1 ? i + 1 : -1).filter(i => i !== -1);
+            const situation = `There are ${urinals.length} urinals. Occupied positions: ${occupiedPositions.join(', ') || 'None'}.`;
+            const prompt = `You are a witty social commentator. Analyze this restroom situation in 2-3 humorous lines below 30 words: ${situation}`;
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'An unknown error occurred.');
+                }
+                
+                if (result.choices && result.choices[0] && result.choices[0].message) {
+                    lastAnalysisText = result.choices[0].message.content;
+                    analysisBox.innerHTML = `<p>${lastAnalysisText.replace(/\\n/g, '<br>')}</p>`;
+                    handleTranscription(); // Auto-transcribe
+                    transcribeBtn.classList.remove('hidden');
+                } else if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) { // Fallback for Gemini structure
+                    lastAnalysisText = result.candidates[0].content.parts[0].text;
+                    analysisBox.innerHTML = `<p>${lastAnalysisText.replace(/\\n/g, '<br>')}</p>`;
+                    handleTranscription(); // Auto-transcribe
+                    transcribeBtn.classList.remove('hidden');
+                }
+                else {
+                    analysisBox.textContent = "The AI's response was empty or in an unexpected format.";
+                }
+            } catch (error) {
+                analysisBox.textContent = `Error: ${error.message}`;
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        numUrinalsSlider.addEventListener('input', handleSliderChange);
+        nextPersonBtn.addEventListener('click', handleNextPerson);
+        resetBtn.addEventListener('click', () => initializeRestroom(parseInt(numUrinalsSlider.value, 10)));
+        analyzeBtn.addEventListener('click', handleAnalysis);
+        transcribeBtn.addEventListener('click', handleTranscription);
+
+        // Initial setup
+        initializeRestroom(parseInt(numUrinalsSlider.value, 10));
+        updateSliderUI(numUrinalsSlider.value);
+    </script>
+</body>
+</html>
